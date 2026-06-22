@@ -2,14 +2,18 @@
 
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MessageBubble } from './MessageBubble'
 import { Composer } from './Composer'
+import { ModelPicker } from './ModelPicker'
+import { SystemPromptEditor } from './SystemPromptEditor'
 import type { ChatUIMessage } from '@/lib/ai/types'
 
 export function ChatView({
   id,
   initialMessages,
+  initialModelId,
+  initialSystemPrompt,
 }: {
   id: string
   initialMessages: ChatUIMessage[]
@@ -31,7 +35,17 @@ export function ChatView({
     transport,
   })
 
+  const [modelId, setModelId] = useState(initialModelId)
+  const [systemPrompt, setSystemPrompt] = useState(initialSystemPrompt ?? '')
   const isStreaming = status === 'streaming' || status === 'submitted'
+
+  const updateConversation = async (patch: Record<string, unknown>) => {
+    await fetch(`/api/conversations/${id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(patch),
+    })
+  }
 
   const scrollerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -41,6 +55,22 @@ export function ChatView({
 
   return (
     <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between border-b p-3">
+        <ModelPicker
+          value={modelId}
+          onChange={(v) => {
+            setModelId(v)
+            void updateConversation({ modelId: v })
+          }}
+        />
+        <SystemPromptEditor
+          value={systemPrompt}
+          onChange={(v) => {
+            setSystemPrompt(v)
+            void updateConversation({ systemPrompt: v || null })
+          }}
+        />
+      </div>
       <div ref={scrollerRef} className="flex-1 space-y-4 overflow-y-auto p-6">
         {messages.map((m) => (
           <MessageBubble key={m.id} message={m} isStreaming={isStreaming && m.id === messages[messages.length - 1]?.id} />
