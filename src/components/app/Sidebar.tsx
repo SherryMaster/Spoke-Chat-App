@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Plus, Trash2 } from 'lucide-react'
+import { Download, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -59,6 +59,9 @@ export function Sidebar() {
             </Link>
             <button onClick={() => remove(c.id)} className="opacity-0 group-hover:opacity-100">
               <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+            <button onClick={() => window.open(`/api/conversations/${c.id}/export`, '_blank')} className="opacity-0 group-hover:opacity-100">
+              <Download className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </div>
         ))}
