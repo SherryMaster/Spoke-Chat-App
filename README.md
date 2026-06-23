@@ -1,6 +1,6 @@
-# opencode-chat-app
+# Spoke
 
-Multi-user AI chat web app. Bring your own OpenCode API key; the app handles accounts, encrypted key storage, multi-device sync, and streaming chat against every OpenCode Zen and Go model.
+A web chat client for OpenCode. Bring your own API key. Every model, every device.
 
 ## Stack
 
@@ -21,8 +21,11 @@ npm run dev
 - `npm run build` — production build
 - `npm run typecheck` — TypeScript without emit
 - `npm run lint` — Next.js lint
-- `npm run db:generate` / `db:migrate` / `db:push` / `db:studio` — Drizzle
-- `npm test` / `npm run test:watch` — Vitest
+- `npm run db:generate` — generate Drizzle migrations
+- `npm run db:migrate` — apply migrations
+- `npm run db:push` — push schema to DB
+- `npm run db:studio` — Drizzle Studio
+- `npm test` — Vitest
 - `npm run test:e2e` — Playwright
 
 ## Architecture

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpenCode Chat",
-  description: "Multi-user AI chat powered by your OpenCode API key.",
+  title: "Spoke — Chat with OpenCode models",
+  description: "A web chat client for OpenCode. Bring your own API key. Every model, every device.",
 };
 
 export default function RootLayout({
