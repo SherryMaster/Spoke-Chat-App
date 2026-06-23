@@ -1,50 +1,45 @@
 import { createAnthropic } from '@ai-sdk/anthropic'
-import { createOpenAI } from '@ai-sdk/openai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import type { OpenCodeModel } from './models'
 
-const ZEN_BASE = 'https://opencode.ai/zen/v1'
-
-function isAnthropicModel(id: string) {
-  return id.startsWith('claude-')
-}
-function isOpenAIModel(id: string) {
-  return /^(gpt-|o[1-9]-)/.test(id)
-}
-function isGoogleModel(id: string) {
-  return id.startsWith('gemini-')
-}
-
 export function getOpenCodeModel(modelId: string, apiKey: string, meta: OpenCodeModel) {
-  if (isAnthropicModel(modelId)) {
-    const provider = createAnthropic({ apiKey, baseURL: ZEN_BASE })
-    return provider(modelId.replace(/^claude-/, ''))
-  }
+  const url = new URL(meta.endpoint)
+  const path = url.pathname.replace(/\/+$/, '')
 
-  if (isOpenAIModel(modelId)) {
-    const provider = createOpenAICompatible({
-      name: 'opencode-zen-openai',
+  if (path.endsWith('/messages')) {
+    const provider = createAnthropic({
       apiKey,
-      baseURL: `${ZEN_BASE}/responses`,
+      baseURL: `${url.origin}${path.slice(0, -'/messages'.length)}`,
     })
     return provider(modelId)
   }
 
-  if (isGoogleModel(modelId)) {
+  if (path.endsWith('/responses')) {
     const provider = createOpenAICompatible({
-      name: 'opencode-zen-google',
+      name: 'opencode-responses',
       apiKey,
-      baseURL: `${ZEN_BASE}/chat/completions`,
+      baseURL: `${url.origin}${path.slice(0, -'/responses'.length)}`,
     })
     return provider(modelId)
   }
 
-  // Default: OpenAI-compatible against /chat/completions
-  const provider = createOpenAICompatible({
-    name: 'opencode-zen-compat',
-    apiKey,
-    baseURL: `${ZEN_BASE}/chat/completions`,
-  })
-  return provider(modelId)
+  if (path.endsWith('/chat/completions')) {
+    const provider = createOpenAICompatible({
+      name: 'opencode-chat',
+      apiKey,
+      baseURL: `${url.origin}${path.slice(0, -'/chat/completions'.length)}`,
+    })
+    return provider(modelId)
+  }
+
+  if (path.includes('/models/')) {
+    const provider = createGoogleGenerativeAI({
+      apiKey,
+      baseURL: `${url.origin}${path.replace(/\/models\/.*$/, '')}`,
+    })
+    return provider(modelId)
+  }
+
+  throw new Error(`Unsupported OpenCode endpoint: ${meta.endpoint}`)
 }
