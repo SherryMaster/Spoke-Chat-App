@@ -17,10 +17,15 @@ export function SignInForm() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    const { error } = await signIn.email({ email, password, callbackURL: '/chat' })
+    const result = await signIn.email({ email, password, callbackURL: '/chat' })
     setLoading(false)
-    if (error) toast.error(error.message)
-    else router.push('/chat')
+    const err = result?.error
+    if (err) {
+      toast.error(typeof err === 'string' ? err : err.message ?? 'Sign-in failed — check console for details')
+      console.error('signIn error:', err)
+    } else {
+      router.push('/chat')
+    }
   }
 
   return (

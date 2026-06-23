@@ -18,10 +18,15 @@ export function SignUpForm() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    const { error } = await signUp.email({ name, email, password, callbackURL: '/onboarding' })
+    const result = await signUp.email({ name, email, password, callbackURL: '/onboarding' })
     setLoading(false)
-    if (error) toast.error(error.message)
-    else router.push('/onboarding')
+    const err = result?.error
+    if (err) {
+      toast.error(typeof err === 'string' ? err : err.message ?? 'Sign-up failed — check console')
+      console.error('signUp error:', err)
+    } else {
+      router.push('/onboarding')
+    }
   }
 
   return (
